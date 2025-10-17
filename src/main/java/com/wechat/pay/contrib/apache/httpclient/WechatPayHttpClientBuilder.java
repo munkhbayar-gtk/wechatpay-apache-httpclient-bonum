@@ -9,11 +9,13 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.execchain.ClientExecChain;
-import org.apache.http.HttpHost;
-
+//import org.apache.http.impl.client.CloseableHttpClient;
+//import org.apache.http.impl.client.HttpClientBuilder;
+//import org.apache.http.impl.execchain.ClientExecChain;
+//import org.apache.http.HttpHost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.HttpHost;
 /**
  * @author xy-peng
  */
@@ -92,12 +94,7 @@ public class WechatPayHttpClientBuilder extends HttpClientBuilder {
         if (validator == null) {
             throw new IllegalArgumentException("缺少签名验证信息");
         }
-        return super.build();
-    }
-
-    @Override
-    protected ClientExecChain decorateProtocolExec(final ClientExecChain requestExecutor) {
-        return new SignatureExec(this.credentials, this.validator, requestExecutor);
+        return super.addExecInterceptorLast("signature-inject", new SignatureExec5(credentials, validator)).build();
     }
 
 }

@@ -13,10 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
+
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +50,7 @@ public class WechatPay2Validator implements Validator {
     }
 
     @Override
-    public final boolean validate(CloseableHttpResponse response) throws IOException {
+    public final boolean validate(ClassicHttpResponse response) throws IOException {
         try {
             validateParameters(response);
 
@@ -59,7 +62,7 @@ public class WechatPay2Validator implements Validator {
                 throw verifyFail("serial=[%s] message=[%s] sign=[%s], request-id=[%s]",
                         serial, message, signature, response.getFirstHeader(REQUEST_ID).getValue());
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ParseException e) {
             log.warn(e.getMessage());
             return false;
         }
@@ -72,7 +75,7 @@ public class WechatPay2Validator implements Validator {
         return verifier.getSerialNumber();
     }
 
-    protected final void validateParameters(CloseableHttpResponse response) {
+    protected final void validateParameters(ClassicHttpResponse response) {
         Header firstHeader = response.getFirstHeader(REQUEST_ID);
         if (firstHeader == null) {
             throw parameterError("empty " + REQUEST_ID);
@@ -102,7 +105,7 @@ public class WechatPay2Validator implements Validator {
         }
     }
 
-    protected final String buildMessage(CloseableHttpResponse response) throws IOException {
+    protected final String buildMessage(ClassicHttpResponse response) throws IOException , ParseException{
         String timestamp = response.getFirstHeader(WECHAT_PAY_TIMESTAMP).getValue();
         String nonce = response.getFirstHeader(WECHAT_PAY_NONCE).getValue();
         String body = getResponseBody(response);
@@ -111,7 +114,7 @@ public class WechatPay2Validator implements Validator {
                 + body + "\n";
     }
 
-    protected final String getResponseBody(CloseableHttpResponse response) throws IOException {
+    protected final String getResponseBody(ClassicHttpResponse response) throws IOException, ParseException {
         HttpEntity entity = response.getEntity();
         return (entity != null && entity.isRepeatable()) ? EntityUtils.toString(entity) : "";
     }

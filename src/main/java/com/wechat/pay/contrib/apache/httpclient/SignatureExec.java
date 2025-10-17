@@ -1,5 +1,5 @@
 package com.wechat.pay.contrib.apache.httpclient;
-
+/*
 import static com.wechat.pay.contrib.apache.httpclient.constant.WechatPayHttpHeaders.WECHAT_PAY_SERIAL;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpStatus.SC_MULTIPLE_CHOICES;
@@ -7,6 +7,7 @@ import static org.apache.http.HttpStatus.SC_OK;
 
 import java.io.IOException;
 import java.util.Arrays;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
@@ -21,10 +22,11 @@ import org.apache.http.impl.execchain.ClientExecChain;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+*/
 /**
  * @author xy-peng
  */
+/*
 public class SignatureExec implements ClientExecChain {
 
     private static final String WECHAT_PAY_HOST_NAME_SUFFIX = ".mch.weixin.qq.com";
@@ -105,3 +107,4 @@ public class SignatureExec implements ClientExecChain {
         return response;
     }
 }
+ */

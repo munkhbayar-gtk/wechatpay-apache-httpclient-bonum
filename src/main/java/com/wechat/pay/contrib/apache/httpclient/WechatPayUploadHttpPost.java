@@ -1,16 +1,18 @@
 package com.wechat.pay.contrib.apache.httpclient;
 
-import static org.apache.http.HttpHeaders.ACCEPT;
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
+import static org.apache.hc.core5.http.ContentType.APPLICATION_JSON;
 
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLConnection;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
+
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,12 +85,12 @@ public class WechatPayUploadHttpPost extends HttpPost {
             }
             WechatPayUploadHttpPost request = new WechatPayUploadHttpPost(uri, meta);
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-            entityBuilder.setMode(HttpMultipartMode.RFC6532)
+            entityBuilder.setMode(HttpMultipartMode.EXTENDED)
                     .addTextBody("meta", meta, APPLICATION_JSON)
                     .addBinaryBody("file", fileInputStream, fileContentType, fileName);
             HttpEntity entity = entityBuilder.build();
             request.setEntity(entity);
-            request.addHeader(ACCEPT, APPLICATION_JSON.toString());
+            request.addHeader(HttpHeaders.ACCEPT, APPLICATION_JSON.toString());
             log.debug("request content-type[{}]", entity.getContentType());
             return request;
         }

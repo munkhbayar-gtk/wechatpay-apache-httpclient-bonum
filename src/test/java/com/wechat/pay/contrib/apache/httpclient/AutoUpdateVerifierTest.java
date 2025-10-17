@@ -1,8 +1,8 @@
 package com.wechat.pay.contrib.apache.httpclient;
 
-import static org.apache.http.HttpHeaders.ACCEPT;
-import static org.apache.http.HttpStatus.SC_OK;
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
+
+import static org.apache.hc.core5.http.ContentType.APPLICATION_JSON;
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -18,13 +18,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,9 +75,9 @@ public class AutoUpdateVerifierTest {
     public void getCertificateTest() throws Exception {
         URIBuilder uriBuilder = new URIBuilder("https://api.mch.weixin.qq.com/v3/certificates");
         HttpGet httpGet = new HttpGet(uriBuilder.build());
-        httpGet.addHeader(ACCEPT, APPLICATION_JSON.toString());
-        CloseableHttpResponse response = httpClient.execute(httpGet);
-        assertEquals(SC_OK, response.getStatusLine().getStatusCode());
+        httpGet.addHeader(HttpHeaders.ACCEPT, APPLICATION_JSON.toString());
+        ClassicHttpResponse response = httpClient.execute(httpGet);
+        assertEquals(SC_OK, response.getCode());
         try {
             HttpEntity entity = response.getEntity();
             // do something useful with the response body
@@ -101,8 +102,8 @@ public class AutoUpdateVerifierTest {
                         .withImage(file.getName(), sha256, is)
                         .build();
 
-                try (CloseableHttpResponse response = httpClient.execute(request)) {
-                    assertEquals(SC_OK, response.getStatusLine().getStatusCode());
+                try (ClassicHttpResponse response = httpClient.execute(request)) {
+                    assertEquals(SC_OK, response.getCode());
                     HttpEntity entity = response.getEntity();
                     // do something useful with the response body
                     // and ensure it is fully consumed

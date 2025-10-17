@@ -1,6 +1,6 @@
 package com.wechat.pay.contrib.apache.httpclient.proxy;
 
-import org.apache.http.HttpHost;
+import org.apache.hc.core5.http.HttpHost;
 
 /**
  * HttpProxyFactory 代理工厂

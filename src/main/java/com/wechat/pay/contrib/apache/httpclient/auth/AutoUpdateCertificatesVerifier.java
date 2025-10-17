@@ -1,8 +1,8 @@
 package com.wechat.pay.contrib.apache.httpclient.auth;
 
-import static org.apache.http.HttpHeaders.ACCEPT;
-import static org.apache.http.HttpStatus.SC_OK;
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
+import static org.apache.hc.core5.http.ContentType.APPLICATION_JSON;
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,10 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +66,7 @@ public class AutoUpdateCertificatesVerifier implements Verifier {
     private static final Validator emptyValidator =
             new Validator() {
                 @Override
-                public boolean validate(CloseableHttpResponse response) throws IOException {
+                public boolean validate(ClassicHttpResponse response) throws IOException {
                     return true;
                 };
 
@@ -125,10 +129,10 @@ public class AutoUpdateCertificatesVerifier implements Verifier {
                 .build()) {
 
             HttpGet httpGet = new HttpGet(CERT_DOWNLOAD_PATH);
-            httpGet.addHeader(ACCEPT, APPLICATION_JSON.toString());
+            httpGet.addHeader(HttpHeaders.ACCEPT, APPLICATION_JSON.toString());
 
-            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-                int statusCode = response.getStatusLine().getStatusCode();
+            try (ClassicHttpResponse response = httpClient.execute(httpGet)) {
+                int statusCode = response.getCode();
                 String body = EntityUtils.toString(response.getEntity());
                 if (statusCode == SC_OK) {
                     List<X509Certificate> newCertList = deserializeToCerts(apiV3Key, body);
@@ -140,6 +144,8 @@ public class AutoUpdateCertificatesVerifier implements Verifier {
                 } else {
                     log.warn("Auto update cert failed, statusCode = {}, body = {}", statusCode, body);
                 }
+            } catch (ParseException e) {
+                throw new IOException(e);
             }
         }
     }

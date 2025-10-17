@@ -1,10 +1,10 @@
 package com.wechat.pay.contrib.apache.httpclient;
 
 import static com.wechat.pay.contrib.apache.httpclient.constant.WechatPayHttpHeaders.WECHAT_PAY_SERIAL;
-import static org.apache.http.HttpHeaders.ACCEPT;
-import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
-import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
+
+import static org.apache.hc.core5.http.ContentType.APPLICATION_JSON;
+import static org.apache.hc.core5.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.hc.core5.http.HttpStatus.SC_UNAUTHORIZED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -22,12 +22,14 @@ import java.security.PrivateKey;
 import java.util.Base64;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -183,12 +185,12 @@ public class RsaCryptoTest {
                 + "}";
         StringEntity reqEntity = new StringEntity(data, APPLICATION_JSON);
         httpPost.setEntity(reqEntity);
-        httpPost.addHeader(ACCEPT, APPLICATION_JSON.toString());
+        httpPost.addHeader(HttpHeaders.ACCEPT, APPLICATION_JSON.toString());
         httpPost.addHeader(WECHAT_PAY_SERIAL, wechatPaySerial);
 
-        CloseableHttpResponse response = httpClient.execute(httpPost);
-        assertTrue(response.getStatusLine().getStatusCode() != SC_UNAUTHORIZED);
-        assertTrue(response.getStatusLine().getStatusCode() != SC_BAD_REQUEST);
+        ClassicHttpResponse response = httpClient.execute(httpPost);
+        assertTrue(response.getCode() != SC_UNAUTHORIZED);
+        assertTrue(response.getCode() != SC_BAD_REQUEST);
         try {
             HttpEntity entity = response.getEntity();
             // do something useful with the response body

@@ -1,9 +1,7 @@
 package com.wechat.pay.contrib.apache.httpclient.cert;
 
-import static org.apache.http.HttpHeaders.ACCEPT;
-import static org.apache.http.HttpStatus.SC_OK;
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
-
+import static org.apache.hc.core5.http.ContentType.APPLICATION_JSON;
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 import com.wechat.pay.contrib.apache.httpclient.Credentials;
 import com.wechat.pay.contrib.apache.httpclient.Validator;
 import com.wechat.pay.contrib.apache.httpclient.WechatPayHttpClientBuilder;
@@ -32,11 +30,15 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.http.HttpHost;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +75,7 @@ public class CertificatesManager {
     private static final Validator emptyValidator =
             new Validator() {
                 @Override
-                public boolean validate(CloseableHttpResponse response) throws IOException {
+                public boolean validate(ClassicHttpResponse response) throws IOException {
                     return true;
                 };
 
@@ -108,7 +110,7 @@ public class CertificatesManager {
      * @throws HttpCodeException HttpCode错误
      */
     public synchronized void putMerchant(String merchantId, Credentials credentials, byte[] apiV3Key)
-            throws IOException, GeneralSecurityException, HttpCodeException {
+            throws IOException, GeneralSecurityException, HttpCodeException, ParseException {
         if (merchantId == null || merchantId.isEmpty()) {
             throw new IllegalArgumentException("merchantId为空");
         }
@@ -246,7 +248,7 @@ public class CertificatesManager {
      * @throws GeneralSecurityException 通用安全性异常
      */
     private synchronized void downloadAndUpdateCert(String merchantId, Verifier verifier, Credentials credentials,
-            byte[] apiV3Key) throws HttpCodeException, IOException, GeneralSecurityException {
+            byte[] apiV3Key) throws HttpCodeException, IOException, GeneralSecurityException, ParseException {
         proxy = resolveProxy();
         try (CloseableHttpClient httpClient = WechatPayHttpClientBuilder.create()
                 .withCredentials(credentials)
@@ -254,9 +256,10 @@ public class CertificatesManager {
                 .withProxy(proxy)
                 .build()) {
             HttpGet httpGet = new HttpGet(CERT_DOWNLOAD_PATH);
-            httpGet.addHeader(ACCEPT, APPLICATION_JSON.toString());
-            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-                int statusCode = response.getStatusLine().getStatusCode();
+            httpGet.addHeader(HttpHeaders.ACCEPT, APPLICATION_JSON.toString());
+            try (ClassicHttpResponse response = httpClient.execute(httpGet)) {
+                //int statusCode = response.getStatusLine().getStatusCode();
+                int statusCode = response.getCode();
                 String body = EntityUtils.toString(response.getEntity());
                 if (statusCode == SC_OK) {
                     Map<BigInteger, X509Certificate> newCertList = CertSerializeUtil.deserializeToCerts(apiV3Key, body);
@@ -286,7 +289,7 @@ public class CertificatesManager {
      * @throws GeneralSecurityException 通用安全性异常
      */
     private void initCertificates(String merchantId, Credentials credentials, byte[] apiV3Key)
-            throws HttpCodeException, IOException, GeneralSecurityException {
+            throws HttpCodeException, IOException, GeneralSecurityException, ParseException {
         downloadAndUpdateCert(merchantId, null, credentials, apiV3Key);
     }
 
