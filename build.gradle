@@ -24,7 +24,8 @@ ext {
     slf4j_version = "2.0.1"
     //slf4j_version = "1.7.36"
     junit_version = "4.13.2"
-    jackson_version = "2.13.4.2"
+    //jackson_version = "2.13.4.2"
+    jackson_version = "2.17.2"
 }
 
 jar {

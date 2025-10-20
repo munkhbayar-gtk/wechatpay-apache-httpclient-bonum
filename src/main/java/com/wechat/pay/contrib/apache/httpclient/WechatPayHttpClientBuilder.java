@@ -94,7 +94,8 @@ public class WechatPayHttpClientBuilder extends HttpClientBuilder {
         if (validator == null) {
             throw new IllegalArgumentException("缺少签名验证信息");
         }
-        return super.addExecInterceptorLast("signature-inject", new SignatureExec5(credentials, validator)).build();
+        addExecInterceptorLast("signature-inject", new SignatureExec5(credentials, validator));
+        return super.build();
     }
 
 }
