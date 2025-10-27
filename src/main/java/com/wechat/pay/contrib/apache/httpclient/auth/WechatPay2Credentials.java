@@ -1,16 +1,22 @@
 package com.wechat.pay.contrib.apache.httpclient.auth;
 
 import com.wechat.pay.contrib.apache.httpclient.Credentials;
+import com.wechat.pay.contrib.apache.httpclient.EntityUtils;
 import com.wechat.pay.contrib.apache.httpclient.WechatPayUploadHttpPost;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.HttpRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +132,7 @@ public class WechatPay2Credentials implements Credentials {
         throw new RuntimeException("Not implemented yet");
     }
 
+
     protected String buildMessage(String nonce, long timestamp, ClassicHttpRequest request) throws IOException, URISyntaxException, ParseException {
         URI uri = request.getUri();
         String canonicalUrl = uri.getRawPath();
@@ -138,7 +145,8 @@ public class WechatPay2Credentials implements Credentials {
         if (request instanceof WechatPayUploadHttpPost) {
             body = ((WechatPayUploadHttpPost) request).getMeta();
         } else if (request.getEntity() != null) {
-            body = EntityUtils.toString(request.getEntity(), StandardCharsets.UTF_8);
+            HttpEntity entity = request.getEntity();
+            body = EntityUtils.toString(entity, StandardCharsets.UTF_8);
         }
 
         return request.getMethod() + "\n"
